@@ -25,7 +25,7 @@
               </thead>
               <tbody>
                 <tr v-for="(partition, index) in partitions" :key="index">
-                  <th scope="row">{{ index + 1}}</th>
+                  <th scope="row"><img src="./assets/harddisk.png"></th>
                   <td class="text-center">{{ partition.desc }}</td>
                   <td class="text-center">{{ partition.size }}</td>
                   <td :id="'used'+partition.desc" class="text-center">{{ partition.used }}</td>
@@ -71,12 +71,13 @@
       updatePart(obj){
         var index = this.findElement(obj.desc);
         if (this.partitions[index].used != obj.used) {
+          this.partitions[index].used = obj.used;
           this.flashCell("used"+obj.desc);
         }
         if (this.partitions[index].free != obj.free) {
+          this.partitions[index].free = obj.free;
           this.flashCell("free"+obj.desc);
         }
-        this.partitions[obj.desc] = obj;
       },
       findElement(desc){
         for(var i=0; i < this.partitions.length; i++)

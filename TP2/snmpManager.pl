@@ -1,13 +1,11 @@
 use SNMP;
 use threads;
-use threads::shared;
 use Net::WebSocket::Server;
 use JSON;
 
 #Starts SNMP session and find available partitions
 
-#my $session :shared;
-$session = new SNMP::Session(DestHost => $ARGV[0], Version => '2c');
+my $session : shared = new SNMP::Session(DestHost => $ARGV[0], Version => '2c');
 ($fsIndex) = $session->bulkwalk(0, 1, [['hrPartitionFSIndex']]);
 
 my @ids;
@@ -27,7 +25,7 @@ sub getValues {
 
 	while (1) {
 		{
-			#lock($session);
+			lock($session);
 			$s = $session->get(['hrFSStorageIndex',$i]);
 		}
 		$vars = new SNMP::VarList(
@@ -36,14 +34,14 @@ sub getValues {
 			['hrStorageUsed',$s],
 			['hrStorageAllocationUnits',$s]);
 		{
-			#lock($session);
+			lock($session);
 			@vals = $session->get($vars);
 		}
 		$toGB = $vals[3] / (10 ** 9);
 		$msg = JSON->new->encode({
 			desc => $vals[0],
 			size => sprintf("%.2f", $vals[1] * $toGB),
-			used => sprintf("%.2f", $vals[2] * $toGB),
+			used => sprintf("%.4f", $vals[2] * $toGB),
 			free => sprintf("%.2f", (1 - $vals[2]/$vals[1]) * 100)
 		});
 		$conn->send('json', $msg);

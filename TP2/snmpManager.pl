@@ -3,7 +3,7 @@ use threads;
 use Net::WebSocket::Server;
 use JSON;
 
-#Starts SNMP session and find available partitions
+# Starts SNMP session and find available partitions
 
 my $session : shared = new SNMP::Session(DestHost => $ARGV[0], Version => '2c');
 ($fsIndex) = $session->bulkwalk(0, 1, [['hrPartitionFSIndex']]);
@@ -16,7 +16,7 @@ for $i (0..@$fsIndex-1) {
 	}
 }
 
-#Subroutine to get and send the partitions' data
+# Subroutine to get and send the partitions' data
 
 sub getValues {
 	my $i = @_[0];
@@ -45,9 +45,9 @@ sub getValues {
 			free => sprintf("%.2f", (1 - $vals[2]/$vals[1]) * 100)
 		});
 		$conn->send('json', $msg);
-		$time = ($free >= 30 && $free < 50) ? 5 : 10;
-		$time = ($free >= 10 && $free < 30) ? 3 : 5;
 		$time = ($free < 10) ? 1 : 3;
+		$time = ($free >= 10 && $free < 30) ? 3 : 5;
+		$time = ($free >= 30 && $free < 50) ? 5 : 10;
 		sleep($time);
 	}
 }

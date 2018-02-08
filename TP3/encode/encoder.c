@@ -114,24 +114,27 @@ void simple_setRequest(char* type, char* val, char** tail){
 	}
 	else if (!strcmp(type, "objectID")) {
 		simple->present = SimpleSyntax_PR_objectID_value;
-		simple->choice.objectID_value = (OBJECT_IDENTIFIER_t) val;
+		OBJECT_IDENTIFIER_t* obj = calloc(1, sizeof(OBJECT_IDENTIFIER_t));
+		obj->buf = (uint8_t*) val;
+		obj->size = sizeof(val);
+		simple->choice.objectID_value = *obj;
 		varsObject(simple, *tail, tail+1);
 	}
 	else app_setRequest(type, val, tail);
 }
 
 void app_setRequest(char* type){
-	if (!strcmp(type, "IpAddress_t"))
+	if (!strcmp(type, "IpAddress_t"));
 		//((IpAddress_t) val);
-	if (!strcmp(type, "Counter32_t"))
+	if (!strcmp(type, "Counter32_t"));
 		//((Counter32_t) val);
-	if (!strcmp(type, "TimeTicks_t"))
+	if (!strcmp(type, "TimeTicks_t"));
 		//((TimeTicks_t) val);
-	if (!strcmp(type, "Opaque_t"))
+	if (!strcmp(type, "Opaque_t"));
 		//((Opaque_t) val);
-	if (!strcmp(type, "Counter64_t"))
+	if (!strcmp(type, "Counter64_t"));
 		//((Counter64_t) val);
-	if (!strcmp(type, "Unsigned32_t"))
+	if (!strcmp(type, "Unsigned32_t"));
 		//((Unsigned32_t) val);
 }
 

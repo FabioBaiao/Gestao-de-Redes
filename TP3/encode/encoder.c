@@ -16,7 +16,7 @@
 #include <ObjectName.h>
 #include <asn_codecs_prim.h>
 #include <PDUs.h>
-#include <SetRequest_PDU.h>
+#include <SetRequest-PDU.h>
 #include <VarBind.h>
 #include <VarBindList.h>
 #include <ANY.h>
@@ -131,7 +131,8 @@ void app_setRequest(){
 		//((Unsigned32_t) val);
 }
 
-int main(char** args) {
+int main(int argv, char** args) {
+	if ()
 	char* prim = *(args+1);
 
 	if (!strcmp(prim, "set-request")){

@@ -31,7 +31,9 @@ void buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	Message_t* message;
 	message = calloc(1, sizeof(Message_t));
 	message->version = v;
-	message->community = (OCTET_STRING_t) cs;
+	OCTET_STRING_t* os = calloc(1, sizeof(OCTET_STRING_t));
+	OCTET_STRING_fromBuf(os, cs, -1);
+	message->community = *os;
 	message->data = *data;
 
 	uint8_t* buf_final[64];
@@ -74,8 +76,8 @@ void varBinding(ObjectSyntax_t* syntax, ObjectName_t* name, char** tail) {
 	 * 0 for success and -1/errno for failure.
 	 */
 	int r = ASN_SEQUENCE_ADD(&varlist->list, var_bind);
-	if (!r) buildPDU(varlist, *tail, tail+1);
-	else printf("Error when adding structure into the set.") //retirar o printf daqui
+	if (!r) buildPDU(varlist, atol(*tail), tail+1);
+	else printf("Error when adding structure into the set."); //retirar o printf daqui
 }
 
 void varsObject(SimpleSyntax_t* simple, char* oid, char** tail) {
@@ -91,6 +93,8 @@ void varsObject(SimpleSyntax_t* simple, char* oid, char** tail) {
 
 	varBinding(object_syntax, object_name, tail);
 }
+
+void app_setRequest();
 
 void simple_setRequest(char* type, char* val, char** tail){
 	SimpleSyntax_t* simple;
@@ -116,7 +120,7 @@ void simple_setRequest(char* type, char* val, char** tail){
 	else app_setRequest(type, val, tail);
 }
 
-void app_setRequest(){
+void app_setRequest(char* type){
 	if (!strcmp(type, "IpAddress_t"))
 		//((IpAddress_t) val);
 	if (!strcmp(type, "Counter32_t"))
@@ -132,11 +136,9 @@ void app_setRequest(){
 }
 
 int main(int argv, char** args) {
-	if ()
 	char* prim = *(args+1);
 
 	if (!strcmp(prim, "set-request")){
 		simple_setRequest(*(args+2), *(args+3), args+4);
 	}
 }
-

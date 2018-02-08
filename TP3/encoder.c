@@ -103,8 +103,9 @@ void simple_setRequest(char* type, char* val, char** tail){
 	}
 	else if (!strcmp(type, "string")) {
 		simple->present = SimpleSyntax_PR_string_value;
-		simple->choice.string_value =
-			OCTET_STRING_new_fromBuf(asn_DEF_OCTET_STRING, val, strlen(val));
+		OCTET_STRING_t* s = calloc(1, sizeof(OCTET_STRING_t));
+		if (!OCTET_STRING_fromString(s, val))
+			simple->choice.string_value = *s;
 		varsObject(simple, *tail, tail+1);
 	}
 	else if (!strcmp(type, "objectID")) {

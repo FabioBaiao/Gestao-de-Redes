@@ -34,6 +34,8 @@ void buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	uint8_t* buf_final[64];
 	asn_enc_rval_t ret_final =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, sizeof(buf_final));
+
+	xer_fprint(stdout, &asn_DEF_Message, message);
 }
 
 void buildPDU(VarBindList_t* varlist, long reqID, char** tail) {

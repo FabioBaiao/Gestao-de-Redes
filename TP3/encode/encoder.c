@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <PRIM_set_request.h>
 
-void parsePrim(long reqID, char* line, char* argv[]) {
+uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 	char* prim;
 	char* args[5];
 	if (line != NULL) {
-		prim = strtok(*line, " ");
+		prim = strtok(line, " ");
 		args[0] = strtok(NULL, " ");
 		args[1] = strtok(NULL, " ");
 		args[2] = strtok(NULL, " ");
@@ -26,7 +26,7 @@ void parsePrim(long reqID, char* line, char* argv[]) {
 			≃> requestID  data_type  value  [oid,  c_str,  version]
 		*/	
 
-		simple_setRequest(reqID, args[0], args[1], args+2);
+		return simple_setRequest(reqID, args[0], args[1], args+2);
 	}
 	if (!strcmp(prim, "get-request")){
 		/** ... */
@@ -40,33 +40,44 @@ int main(int argc, char** argv) {
 	if (argc > 2) {
 		/** INPUT FROM THE CMD LINE
 			=> ./encoder  PRIMITIVE  [DATA_TYPE]  [VALUE]  OID  C_STR  VERSION
+			EXAMPLE
+			=> ./encoder  set-request  integer  7  1.3.6.1.2.1.25.2.3.1.4  public  -v2c
 		*/
-		parsePrim(requestID, NULL, argv+1);		
-	}
+		struct sockaddr_in addr;
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(9999);
+		addr.sin_addr.s_addr = inet_addr("localhost");
+		int sock = socket(AF_INET, SOCK_DGRAM, 0);
+		socklen_t sock_size = sizeof(addr);
 
-	if (argc == 2) {
-		/** INPUT FROM FILE
-			=> ./encoder FILE_NAME
-		*/
-		printf("=> Looking for the file to read...");
-		FILE *fp = fopen(*(argv+1), "r");
-		
-		if (fp != NULL) {
-			printf("=> File successfully opened!\n");
-			char* line = (char*) malloc(255);
-
-			while (!feof(fp)) {
-				if (fgets(line, 255, fp) != NULL)
-					parsePrim(requestID, &line, NULL);
-			}
-			
-			free(line);
-		}
-		else
-			printf("File couldn't be found or opened :(\n");
+		uint8_t* buff = parsePrim(requestID, NULL, argv+1);
+		int sent =
+			sendto(sock, buff, sizeof(buff), 0, (struct sockaddr *)&addr, sock_size);
 	}
 	else
-		printf("=> Not enough arguments were given.\n");
+		if (argc == 2) {
+			/** INPUT FROM FILE
+				=> ./encoder FILE_NAME
+			*/
+			printf("=> Looking for the file to read...");
+			FILE *fp = fopen(*(argv+1), "r");
+			
+			if (fp != NULL) {
+				printf("=> File successfully opened!\n");
+				char* line = (char*) malloc(255);
+
+				while (!feof(fp)) {
+					if (fgets(line, 255, fp) != NULL)
+						parsePrim(requestID, line, NULL);
+				}
+				
+				free(line);
+			}
+			else
+				printf("File couldn't be found or opened :(\n");
+		}
+		else
+			printf("=> Not enough arguments were given.\n");
 
 	return 0;
 }

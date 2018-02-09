@@ -6,7 +6,8 @@ ASN_LIBRARY ?= libasncodec.a
 ASN_PROGRAM ?= encoder
 ASN_PROGRAM_SRCS ?= \
 	encoder.c\
-	pdu_collection.c
+	pdu_collection.c\
+	PRIM_set_request.c
 
 all: $(ASN_PROGRAM)
 

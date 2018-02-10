@@ -27,6 +27,7 @@ uint8_t* buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	message = calloc(1, sizeof(Message_t));
 	OCTET_STRING_t* os = calloc(1, sizeof(OCTET_STRING_t));
 	OCTET_STRING_fromBuf(os, cs, -1);
+	message->version = v;
 	message->community = *os;
 	message->data = *data;
 
@@ -80,12 +81,18 @@ uint8_t* varBinding(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char
 		return NULL;
 }
 
-uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, char* oid_str, char** tail) {
+uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app, char* oid_str, char** tail) {
 	ObjectSyntax_t* object_syntax;
 	object_syntax = calloc(1, sizeof(ObjectSyntax_t));
-	object_syntax->present = ObjectSyntax_PR_simple;
-	object_syntax->choice.simple = *simple;
-
+	if (simple != NULL) {
+		object_syntax->present = ObjectSyntax_PR_simple;
+		object_syntax->choice.simple = *simple;
+	}
+	else {
+		object_syntax->present = ObjectSyntax_PR_application_wide;
+		object_syntax->choice.application_wide = *app;		
+	}
+	
 	ObjectName_t* object_name;
 	object_name = calloc(1, sizeof(ObjectName_t));
 	//=============================================
@@ -94,7 +101,7 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, char* oid_str, char** ta
 	int i = 0;
 	char* token = strtok(oid_str, ".");
 	do {
-		oid = strcat(oid, token);
+		oid[i++] = atoi(token);
 		token = strtok(NULL, ".");
 	}
 	while (token != NULL);
@@ -111,14 +118,14 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 	if (!strcmp(type, "integer")) {
 		simple->present = SimpleSyntax_PR_integer_value;
 		simple->choice.integer_value = atol(val);
-		return varsObject(reqID, simple, *tail, tail+1);
+		return varsObject(reqID, simple, NULL, *tail, tail+1);
 	}
 	else if (!strcmp(type, "string")) {
 		simple->present = SimpleSyntax_PR_string_value;
 		OCTET_STRING_t* s = calloc(1, sizeof(OCTET_STRING_t));
 		if (!OCTET_STRING_fromString(s, val))
 			simple->choice.string_value = *s;
-		return varsObject(reqID, simple, *tail, tail+1);
+		return varsObject(reqID, simple, NULL, *tail, tail+1);
 	}
 	else if (!strcmp(type, "objectID")) {
 		simple->present = SimpleSyntax_PR_objectID_value;
@@ -129,7 +136,7 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 		int i = 0;
 		char* token = strtok(val, ".");
 		do {
-			oid = strcat(oid, token);
+			oid[i++] = atoi(token);
 			token = strtok(NULL, ".");
 		}
 		while (token != NULL);
@@ -137,14 +144,22 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 		obj->buf = oid;
 		obj->size = oid_size;
 		simple->choice.objectID_value = *obj;
-		return varsObject(reqID, simple, *tail, tail+1);
+		return varsObject(reqID, simple, NULL, *tail, tail+1);
 	}
 	else app_setRequest(reqID, type, val, tail);
 }
 
 uint8_t* app_setRequest(long reqID, char* type, char* val, char** tail){
-	if (!strcmp(type, "IpAddress_t"));
-		//((IpAddress_t) val);
+	ApplicationSyntax_t* app;
+	app = calloc(1, sizeof(ApplicationSyntax_t));
+
+	if (!strcmp(type, "IpAddress_t")) {
+		app->present = ApplicationSyntax_PR_ipAddress_value;
+		OCTET_STRING_t* ip = calloc(1, sizeof(OCTET_STRING_t));
+		OCTET_STRING_fromBuf(ip, val, -1);
+		app->choice.ipAddress_value = (IpAddress_t) *ip;
+		return varsObject(reqID, NULL, app, *tail, tail+1);
+	}
 	if (!strcmp(type, "Counter32_t"));
 		//((Counter32_t) val);
 	if (!strcmp(type, "TimeTicks_t"));

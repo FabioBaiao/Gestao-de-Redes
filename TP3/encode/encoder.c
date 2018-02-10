@@ -59,19 +59,24 @@ int main(int argc, char** argv) {
 			/** INPUT FROM FILE
 				=> ./encoder FILE_NAME
 			*/
-			printf("=> Looking for the file to read...");
+			printf("=> Looking for the file to read...\n");
 			FILE *fp = fopen(*(argv+1), "r");
 
 			if (fp != NULL) {
 				printf("=> File successfully opened!\n");
+				FILE *out = fopen("SNMP_output.txt", "w");
 				char* line = (char*) malloc(255);
 
 				while (!feof(fp)) {
 					if (fgets(line, 255, fp) != NULL)
-						parsePrim(requestID, line, NULL);
+						fprintf(out, "%s\n", parsePrim(requestID, line, NULL));
 				}
 
 				free(line);
+				fclose(fp);
+				fclose(out);
+				printf("Encoding finished! Output:\n");
+			    system("cat SNMP_output.txt");
 			}
 			else
 				printf("File couldn't be found or opened :(\n");

@@ -80,7 +80,7 @@ uint8_t* varBinding(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char
 		return NULL;
 }
 
-uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, char* oid, char** tail) {
+uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, char* oid_str, char** tail) {
 	ObjectSyntax_t* object_syntax;
 	object_syntax = calloc(1, sizeof(ObjectSyntax_t));
 	object_syntax->present = ObjectSyntax_PR_simple;
@@ -88,8 +88,19 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, char* oid, char** tail) 
 
 	ObjectName_t* object_name;
 	object_name = calloc(1, sizeof(ObjectName_t));
-	object_name->buf = (uint8_t *) oid;
-	object_name->size = strlen(oid);
+	//=============================================
+	size_t oid_size = 16;
+	uint8_t* oid = calloc(oid_size, sizeof(uint8_t));
+	int i = 0;
+	char* token = strtok(oid_str, ".");
+	do {
+		oid = strcat(oid, token);
+		token = strtok(NULL, ".");
+	}
+	while (token != NULL);
+	//=============================================
+	object_name->buf = oid;
+	object_name->size = oid_size;
 	return varBinding(reqID, object_syntax, object_name, tail);
 }
 
@@ -113,16 +124,18 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 		simple->present = SimpleSyntax_PR_objectID_value;
 		OBJECT_IDENTIFIER_t* obj = calloc(1, sizeof(OBJECT_IDENTIFIER_t));
 		//=============================================
-		int ids[16], i = 0;
+		size_t oid_size = 16;
+		uint8_t* oid = calloc(oid_size, sizeof(uint8_t));
+		int i = 0;
 		char* token = strtok(val, ".");
 		do {
-			ids[i++] = atoi(token);
+			oid = strcat(oid, token);
 			token = strtok(NULL, ".");
 		}
 		while (token != NULL);
 		//=============================================
-		obj->buf = (uint8_t*) val;
-		obj->size = sizeof(val);
+		obj->buf = oid;
+		obj->size = oid_size;
 		simple->choice.objectID_value = *obj;
 		return varsObject(reqID, simple, *tail, tail+1);
 	}

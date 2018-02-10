@@ -153,21 +153,21 @@ uint8_t* app_setRequest(long reqID, char* type, char* val, char** tail){
 	ApplicationSyntax_t* app;
 	app = calloc(1, sizeof(ApplicationSyntax_t));
 
-	if (!strcmp(type, "IpAddress_t")) {
+	if (!strcmp(type, "IpAddress")) {
 		app->present = ApplicationSyntax_PR_ipAddress_value;
 		OCTET_STRING_t* ip = calloc(1, sizeof(OCTET_STRING_t));
 		OCTET_STRING_fromBuf(ip, val, -1);
 		app->choice.ipAddress_value = (IpAddress_t) *ip;
 		return varsObject(reqID, NULL, app, *tail, tail+1);
 	}
-	if (!strcmp(type, "Counter32_t"));
+	if (!strcmp(type, "Counter32"));
 		//((Counter32_t) val);
-	if (!strcmp(type, "TimeTicks_t"));
+	if (!strcmp(type, "TimeTicks"));
 		//((TimeTicks_t) val);
-	if (!strcmp(type, "Opaque_t"));
+	if (!strcmp(type, "Opaque"));
 		//((Opaque_t) val);
-	if (!strcmp(type, "Counter64_t"));
+	if (!strcmp(type, "Counter64"));
 		//((Counter64_t) val);
-	if (!strcmp(type, "Unsigned32_t"));
+	if (!strcmp(type, "Unsigned32"));
 		//((Unsigned32_t) val);
 }

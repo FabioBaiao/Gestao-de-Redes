@@ -27,10 +27,24 @@ void decode_simple_syntax(SimpleSyntax_t* simple) {
   }
 }
 
+void decode_application_syntax(ApplicationSyntax_t* app) {
+  printf("DATA TYPE: ")
+  switch (app->present) {
+    case ApplicationSyntax_PR_ipAddress_value:
+      printf("ipAddress\n");
+      printf("VALUE: %s\n", (char *) app->choice.ipAddress_value.buf);
+      break;
+
+  }
+}
+
 void decode_obj_syntax(ObjectSyntax_t* object_syntax) {
   switch (object_syntax->present) {
     case ObjectSyntax_PR_simple:
       decode_simple_syntax(&object_syntax->choice.simple);
+      break;
+    case ObjectSyntax_PR_application_wide:
+      decode_application_syntax(&object_syntax->choice.application_wide);
       break;
   }
 }

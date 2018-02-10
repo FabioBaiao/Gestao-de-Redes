@@ -112,7 +112,15 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 	else if (!strcmp(type, "objectID")) {
 		simple->present = SimpleSyntax_PR_objectID_value;
 		OBJECT_IDENTIFIER_t* obj = calloc(1, sizeof(OBJECT_IDENTIFIER_t));
-		// TO DO
+		//=============================================
+		int ids[16], i = 0;
+		char* token = strtok(val, ".");
+		do {
+			ids[i++] = atoi(token);
+			token = strtok(NULL, ".");
+		}
+		while (token != NULL);
+		//=============================================
 		obj->buf = (uint8_t*) val;
 		obj->size = sizeof(val);
 		simple->choice.objectID_value = *obj;

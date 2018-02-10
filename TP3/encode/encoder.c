@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <arpa/inet.h>
 #include <PRIM_set_request.h>
 
 uint8_t* parsePrim(long reqID, char* line, char* argv[]) {

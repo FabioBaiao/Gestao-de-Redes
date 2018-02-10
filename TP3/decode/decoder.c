@@ -1,13 +1,29 @@
 #include <Message.h>
 #include <PDUs.h>
 
+void printOid(uint8_t* buf, int size) {
+  printf("%d", buf[0]);
+  for (size_t i = 1; i < size; i++) {
+    printf(".%d", buf[i]);
+  }
+}
+
 void decode_simple_syntax(SimpleSyntax_t* simple) {
   printf("DATA TYPE: ");
   switch (simple->present) {
     case SimpleSyntax_PR_integer_value:
       printf("integer\n");
-      printf("VALUE: %d\n", simple->choice.integer_value);
+      printf("VALUE: %ld\n", simple->choice.integer_value);
       break;
+    case SimpleSyntax_PR_string_value:
+      printf("string\n");
+      printf("VALUE: %s\n", (char *) simple->choice.string_value.buf);
+      break;
+    case SimpleSyntax_PR_objectID_value:
+      printf("objectID\n");
+      printf("VALUE: ");
+      printOid(simple->choice.objectID_value.buf, simple->choice.objectID_value.size);
+      printf("\n");
   }
 }
 
@@ -20,10 +36,8 @@ void decode_obj_syntax(ObjectSyntax_t* object_syntax) {
 }
 
 void decode_obj_name(ObjectName_t* object_name) {
-  printf("OID: %d", object_name->buf[0]);
-  for (size_t i = 1; i < object_name->size; i++) {
-    printf(".%d", object_name->buf[i]);
-  }
+  printf("OID: ");
+  printOid(object_name->buf, object_name->size);
   printf("\n");
 }
 
@@ -89,6 +103,7 @@ int main(int argc, char const *argv[]) {
     int recv = recvfrom(sock, buffer, buffer_size, 0, (struct sockaddr *)&addr, &udp_socket_size);
 
     decode_snmp(buffer, recv);
+    printf("\n");
   }
   return 0;
 }

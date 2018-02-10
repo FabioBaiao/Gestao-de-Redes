@@ -90,9 +90,9 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app
 	}
 	else {
 		object_syntax->present = ObjectSyntax_PR_application_wide;
-		object_syntax->choice.application_wide = *app;		
+		object_syntax->choice.application_wide = *app;
 	}
-	
+
 	ObjectName_t* object_name;
 	object_name = calloc(1, sizeof(ObjectName_t));
 	//=============================================
@@ -107,7 +107,7 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app
 	while (token != NULL);
 	//=============================================
 	object_name->buf = oid;
-	object_name->size = oid_size;
+	object_name->size = i;
 	return varBinding(reqID, object_syntax, object_name, tail);
 }
 
@@ -142,7 +142,7 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 		while (token != NULL);
 		//=============================================
 		obj->buf = oid;
-		obj->size = oid_size;
+		obj->size = i;
 		simple->choice.objectID_value = *obj;
 		return varsObject(reqID, simple, NULL, *tail, tail+1);
 	}

@@ -1,8 +1,39 @@
 #include <Message.h>
 #include <PDUs.h>
 
+void decode_simple_syntax(SimpleSyntax_t* simple) {
+  printf("DATA TYPE: ");
+  switch (simple->present) {
+    case SimpleSyntax_PR_integer_value:
+      printf("integer\n");
+      printf("VALUE: %d\n", simple->choice.integer_value);
+      break;
+  }
+}
+
+void decode_obj_syntax(ObjectSyntax_t* object_syntax) {
+  switch (object_syntax->present) {
+    case ObjectSyntax_PR_simple:
+      decode_simple_syntax(&object_syntax->choice.simple);
+      break;
+  }
+}
+
+void decode_obj_name(ObjectName_t* object_name) {
+  printf("OID: %d", object_name->buf[0]);
+  for (size_t i = 1; i < object_name->size; i++) {
+    printf(".%d", object_name->buf[i]);
+  }
+  printf("\n");
+}
+
 void decode_var_bind(VarBind_t* var_bind) {
-  
+  switch (var_bind->choice.present) {
+    case choice_PR_value:
+      decode_obj_syntax(&var_bind->choice.choice.value);
+      break;
+  }
+  decode_obj_name(&var_bind->name);
 }
 
 void decode_var_bindings(VarBindList_t var_bindings) {
@@ -11,13 +42,16 @@ void decode_var_bindings(VarBindList_t var_bindings) {
   }
 }
 
-void decode_pdus(PDUs_t pdu) {
+void decode_pdus(PDUs_t* pdu) {
+  printf("PRIMITIVE: ");
   switch (pdu->present) {
     case PDUs_PR_set_request:
+      printf("set-request\n");
       decode_var_bindings(pdu->choice.set_request.variable_bindings);
       break;
 
     default:
+      break;
   }
 }
 
@@ -27,16 +61,15 @@ void decode_message(Message_t* message) {
 
   decode_pdus(pdu);
 
-  VarBindList_t var_bindings = pdu->choice.set_request.variable_bindings;
-  int var_list_size = var_bindings.list.count;
-  VarBind_t* var_bind = var_bindings.list.array[0];
+  printf("C_STR: %s\n", (char *) message->community.buf);
+  printf("VERSION: %d\n", message->version);
 }
 
 void decode_snmp(uint8_t buffer_final[], size_t buffer_final_size) {
   Message_t* message = 0;
   asn_dec_rval_t rval = asn_decode(0, ATS_BER, &asn_DEF_Message, (void **)&message, buffer_final, buffer_final_size);
 
-  xer_fprint(stdout, &asn_DEF_Message, message);
+  //xer_fprint(stdout, &asn_DEF_Message, message);
   decode_message(message);
 }
 
@@ -51,7 +84,8 @@ int main(int argc, char const *argv[]) {
 
   while (1) {
     size_t buffer_size = 1024;
-    uint8_t *buffer = calloc(1, 1024 * sizeof(uint8_t));
+    uint8_t *buffer = calloc(1024, sizeof(uint8_t));
+
     int recv = recvfrom(sock, buffer, buffer_size, 0, (struct sockaddr *)&addr, &udp_socket_size);
 
     decode_snmp(buffer, recv);

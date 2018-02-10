@@ -30,9 +30,9 @@ uint8_t* buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	message->community = *os;
 	message->data = *data;
 
-	uint8_t buf_final[1024];
+	uint8_t* buf_final = calloc(1024, sizeof(uint8_t));
 	asn_enc_rval_t ret_final =
-		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, sizeof(buf_final));
+		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, 1024);
 
 	xer_fprint(stdout, &asn_DEF_Message, message);
 	return buf_final;
@@ -51,10 +51,11 @@ uint8_t* buildPDU(VarBindList_t* varlist, long reqID, char** tail) {
 	pdu->present = PDUs_PR_set_request;
 	pdu->choice.set_request = *setRequestPDU;
 
-	uint8_t buf[1024];
+	size_t buf_size = 1024;
+	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
 	asn_enc_rval_t ret =
-		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, sizeof(buf));
-		
+		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, buf_size);
+
 	return buildMsg(buf, ret, *tail, atol(*(tail+1)));
 }
 
@@ -111,6 +112,7 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 	else if (!strcmp(type, "objectID")) {
 		simple->present = SimpleSyntax_PR_objectID_value;
 		OBJECT_IDENTIFIER_t* obj = calloc(1, sizeof(OBJECT_IDENTIFIER_t));
+		// TO DO
 		obj->buf = (uint8_t*) val;
 		obj->size = sizeof(val);
 		simple->choice.objectID_value = *obj;

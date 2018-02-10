@@ -24,7 +24,7 @@ uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 	if (!strcmp(prim, "set-request")){
 		/**	ARGS
 			≃> requestID  data_type  value  [oid,  c_str,  version]
-		*/	
+		*/
 
 		return simple_setRequest(reqID, args[0], args[1], args+2);
 	}
@@ -34,9 +34,9 @@ uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 }
 
 int main(int argc, char** argv) {
-	
+
 	long requestID = 0;
-	
+
 	if (argc > 2) {
 		/** INPUT FROM THE CMD LINE
 			=> ./encoder  PRIMITIVE  [DATA_TYPE]  [VALUE]  OID  C_STR  VERSION
@@ -46,13 +46,13 @@ int main(int argc, char** argv) {
 		struct sockaddr_in addr;
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(9999);
-		addr.sin_addr.s_addr = inet_addr("localhost");
+		addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 		int sock = socket(AF_INET, SOCK_DGRAM, 0);
 		socklen_t sock_size = sizeof(addr);
 
 		uint8_t* buff = parsePrim(requestID, NULL, argv+1);
 		int sent =
-			sendto(sock, buff, sizeof(buff), 0, (struct sockaddr *)&addr, sock_size);
+			sendto(sock, buff, 1024, 0, (struct sockaddr *)&addr, sock_size);
 	}
 	else
 		if (argc == 2) {
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 			*/
 			printf("=> Looking for the file to read...");
 			FILE *fp = fopen(*(argv+1), "r");
-			
+
 			if (fp != NULL) {
 				printf("=> File successfully opened!\n");
 				char* line = (char*) malloc(255);
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 					if (fgets(line, 255, fp) != NULL)
 						parsePrim(requestID, line, NULL);
 				}
-				
+
 				free(line);
 			}
 			else

@@ -6,7 +6,8 @@ ASN_LIBRARY ?= libasncodec.a
 ASN_PROGRAM ?= decoder
 ASN_PROGRAM_SRCS ?= \
 	decoder.c\
-	pdu_collection.c
+	pdu_collection.c\
+	decodeAPI.c
 
 all: $(ASN_PROGRAM)
 
@@ -30,4 +31,3 @@ regen: regenerate-from-asn1-source
 
 regenerate-from-asn1-source:
 	asn1c snmpv2c.asn1
-

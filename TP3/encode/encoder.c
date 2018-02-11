@@ -3,45 +3,77 @@
 #include <PRIM_set_request.h>
 #include <PRIM_get_request.h>
 #include <PRIM_get_next.h>
+#include <PRIM_get_bulk.h>
 
-uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
+typedef struct tuple {
 	char* prim;
-	char* args[5];
-	if (line != NULL) {
-		prim = strtok(line, " ");
-		args[0] = strtok(NULL, " ");
-		args[1] = strtok(NULL, " ");
-		args[2] = strtok(NULL, " ");
-		args[3] = strtok(NULL, " ");
-		args[4] = strtok(NULL, " ");
-	}
-	else {
-		prim = argv[0];
-		args[0] = argv[1];
-		args[1] = argv[2];
-		args[2] = argv[3];
-		args[3] = argv[4];
-		args[4] = argv[5];
-	}
+	char** args;
+	int argc;
+} *TUPLE;
 
-	if (!strcmp(prim, "set-request")){
+TUPLE lineHandler(char* line) {
+	TUPLE res = calloc(1, sizeof(struct tuple));
+	int size = 5, i = 0;
+	res->args = (char**) malloc(size * sizeof(char *));
+	res->prim = strtok(line, " ");
+	char* token = strtok(NULL, " ");
+	do {
+		res->args[i] = token;
+		token = strtok(NULL, " ");
+		i += 1;
+		if (i%5 == 0 && token != NULL) {
+			size += 5;
+			res->args = realloc(res->args, size);
+		}
+	} while(token != NULL);
+	res->argc = i;
+	
+	return res;
+}
+
+TUPLE argvHandler(char* argv[], int n) {
+	TUPLE res = calloc(1, sizeof(struct tuple));
+	res->prim = argv[0];
+	res->argc = n-1;
+	res->args = (char **) malloc((n-1) * sizeof(char *));
+	int i;
+	for (i = 0; i < n-1; i++)
+		res->args[i] = argv[i+1];
+
+	return res;
+}
+
+uint8_t* parsePrim(long reqID, char* line, char* argv[], int n) {
+	TUPLE res;
+
+	if (line != NULL)
+		res = lineHandler(line);
+	else 
+		res = argvHandler(argv, n);
+
+	if (!strcmp(res->prim, "set-request")){
 		/**	ARGS
 			≃> requestID  data_type  value  [oid,  c_str,  version]
 		*/
-
-		return simple_setRequest(reqID, args[0], args[1], args+2);
+		return simple_setRequest(reqID, res->args[0], res->args[1], res->args+2);
 	}
-	if (!strcmp(prim, "get-request")){
+	if (!strcmp(res->prim, "get-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid.0]
 		*/
-		return getReqHandler(reqID, args);
+		return getReqHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(prim, "get-next-request")){
+	if (!strcmp(res->prim, "get-next-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid]
 		*/
-		return getNextHandler(reqID, args);
+		return getNextHandler(reqID, res->args, res->argc);
+	}
+	if (!strcmp(res->prim, "get-bulk-request")){
+		/** ARGS
+			=> requestID  c_str  version  non-repeaters  max-rep  [oid]
+		*/
+		return getBulkHandler(reqID, res->args, res->argc);
 	}
 }
 
@@ -62,7 +94,7 @@ int main(int argc, char** argv) {
 		int sock = socket(AF_INET, SOCK_DGRAM, 0);
 		socklen_t sock_size = sizeof(addr);
 
-		uint8_t* buff = parsePrim(requestID, NULL, argv+1);
+		uint8_t* buff = parsePrim(requestID, NULL, argv+1, argc-1);
 		int sent =
 			sendto(sock, buff, 1024, 0, (struct sockaddr *)&addr, sock_size);
 	}
@@ -81,7 +113,7 @@ int main(int argc, char** argv) {
 
 				while (!feof(fp)) {
 					if (fgets(line, 255, fp) != NULL)
-						fprintf(out, "%s\n", parsePrim(requestID, line, NULL));
+						fprintf(out, "%s\n", parsePrim(requestID, line, NULL, -1));
 				}
 
 				free(line);

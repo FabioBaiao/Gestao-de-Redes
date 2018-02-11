@@ -61,13 +61,16 @@ uint8_t* varBinding_getNext(long reqID, ObjectName_t* names[], char* cs, long v)
 	return buildPDU_getNext(varlist, reqID, cs, v);
 }
 
-uint8_t* getNextHandler(long reqID, char* args[]) {
+uint8_t* getNextHandler(long reqID, char* args[], int n) {
 	char *token, *oid_str, *c_str = args[0];
 	long v = atol(args[1]);
-	ObjectName_t* oids[3] = {NULL, NULL, NULL};
+	int j, i;
+	ObjectName_t** oids = (ObjectName_t**) malloc(n * sizeof(ObjectName_t*));
+	for (i = 0; i < n; i++)
+		oids[i] = NULL;
 	size_t oid_size = 16;
 	uint8_t* oid;
-	int j, i = 0;
+	i = 0;
 
 	do {
 		oid_str = args[i+2];
@@ -85,7 +88,7 @@ uint8_t* getNextHandler(long reqID, char* args[]) {
 		oids[i]->buf = oid;
 		oids[i]->size = j;
 		i++;
-	} while(args[i+2] != NULL);
+	} while(i+2 < n);
 
 	return varBinding_getNext(reqID, oids, c_str, v);
 }

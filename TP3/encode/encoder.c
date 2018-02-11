@@ -30,7 +30,10 @@ uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 		return simple_setRequest(reqID, args[0], args[1], args+2);
 	}
 	if (!strcmp(prim, "get-request")){
-		/** ... */
+		/** ARGS
+			=> requestID  c_str  version  [oid.0]
+		*/
+		return getReqHandler(reqID, args);
 	}
 }
 

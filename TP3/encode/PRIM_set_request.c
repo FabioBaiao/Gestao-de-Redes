@@ -40,7 +40,7 @@ uint8_t* buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	return buf_final;
 }
 
-uint8_t* buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
+uint8_t* buildPDU(VarBindList_t* varlist, long reqID, char** tail) {
 	SetRequest_PDU_t* setRequestPDU;
 	setRequestPDU = calloc(1, sizeof(SetRequest_PDU_t));
 	setRequestPDU->request_id = reqID;
@@ -52,27 +52,6 @@ uint8_t* buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
 	pdu = calloc(1, sizeof(PDUs_t));
 	pdu->present = PDUs_PR_set_request;
 	pdu->choice.set_request = *setRequestPDU;
-
-	size_t buf_size = 1024;
-	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
-	asn_enc_rval_t ret =
-		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, buf_size);
-
-	return buildMsg(buf, ret, *tail, atol(*(tail+1)));
-}
-
-uint8_t* buildPDU_getReq(VarBindList_t* varlist, long reqID, char** tail) {
-	getRequest_PDU_t* getRequestPDU;
-	getRequestPDU = calloc(1, sizeof(getRequest_PDU_t));
-	getRequestPDU->request_id = reqID;
-	getRequestPDU->error_index = 0;
-	getRequestPDU->error_status = 0;
-	getRequestPDU->variable_bindings = *varlist;
-
-	PDUs_t *pdu;
-	pdu = calloc(1, sizeof(PDUs_t));
-	pdu->present = PDUs_PR_get_request;
-	pdu->choice.set_request = *getRequestPDU;
 
 	size_t buf_size = 1024;
 	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
@@ -98,7 +77,7 @@ uint8_t* varBinding(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char
 	 */
 	int r = ASN_SEQUENCE_ADD(&varlist->list, var_bind);
 	if (!r)
-		return buildPDU_setReq(varlist, reqID, tail);
+		return buildPDU(varlist, reqID, tail);
 	else
 		return NULL;
 }
@@ -202,12 +181,7 @@ uint8_t* app_setRequest(long reqID, char* type, char* val, char** tail){
 	if (!strcmp(type, "Counter64")) {
 		app->present = ApplicationSyntax_PR_big_counter_value;
 		INTEGER_t* num = calloc(1, sizeof(INTEGER_t));
-		size_t num_size = 64;
-		uint8_t* buf = calloc(num_size, sizeof(uint8_t));
-		//  ISTO NÃO É ASSIM, NÃO ESTOU A SABER CONVERTER
-		buf = (uint8_t*) val;
-		num->buf = buf;
-		num->size = num_size;
+		asn_ulong2INTEGER(num, atol(val));
 		app->choice.big_counter_value = *num;
 		return varsObject(reqID, NULL, app, *tail, tail+1);
 	}

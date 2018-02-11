@@ -111,19 +111,34 @@ int decode_var_bind(VarBind_t* var_bind, char** result) {
   }
 }
 
+// retorna numero de posicoes preenchidas no array result
 int decode_var_bindings(VarBindList_t var_bindings, char** result) {
-  //for (int i = 0; i < var_bindings.list.count; i++) {
-    return decode_var_bind(var_bindings.list.array[0], result);
-  //}
+  int count = 0;
+  for (int i = 0; i < var_bindings.list.count; i++) {
+    int res = decode_var_bind(var_bindings.list.array[i], result);
+    result += res;
+    count += res;
+  }
+  return count;
 }
 
 // retorna numero de posicoes preenchidas no array result
 int decode_pdus(PDUs_t* pdu, char** result) {
+  int size;
   switch (pdu->present) {
     case PDUs_PR_set_request:
       result[0] = strdup("set-request");
-      int size = decode_var_bindings(pdu->choice.set_request.variable_bindings, result+1);
-      return size+1;
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.set_request.request_id);
+      size = decode_var_bindings(pdu->choice.set_request.variable_bindings, result+2);
+      return size+2;
+      break;
+    case PDUs_PR_get_request:
+      result[0] = strdup("get-request");
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.get_request.request_id);
+      size = decode_var_bindings(pdu->choice.get_request.variable_bindings, result+2);
+      return size+2;
       break;
 
     default:
@@ -137,11 +152,12 @@ int decode_message(Message_t* message, char** result) {
   PDUs_t* pdu = 0;
   asn_dec_rval_t rval = asn_decode(0, ATS_BER, &asn_DEF_PDUs, (void**)&pdu, message->data.buf, message->data.size);
 
-  int size = decode_pdus(pdu, result);
+  result[0] = strdup((char *) message->community.buf);
+  result[1] = calloc(8, sizeof(char*));
+  sprintf(result[1], "%ld", message->version);
 
-  result[size] = strdup((char *) message->community.buf);
-  result[size+1] = calloc(8, sizeof(char*));
-  sprintf(result[size+1], "%ld", message->version);
+  int size = decode_pdus(pdu, result+2);
+
   return size+2;
 }
 
@@ -155,14 +171,17 @@ int decode_snmp(uint8_t buffer_final[], size_t buffer_final_size, char** result)
 
 void printDecode(char** result, int size) {
   int i = 0;
+  printf("C_STR: %s\n", result[i++]);
+  printf("VERSION: %s\n", result[i++]);
   printf("PRIMITIVE: %s\n", result[i++]);
-  if (size == 6) {
+  printf("REQUEST ID: %s\n", result[i++]);
+  if (size == 7) {
     printf("DATA TYPE: %s\n", result[i++]);
     printf("VALUE: %s\n", result[i++]);
   }
-  printf("OID: %s\n", result[i++]);
-  printf("C_STR: %s\n", result[i++]);
-  printf("VERSION: %s\n", result[i++]);
+  while (i < size)
+    printf("OID: %s\n", result[i++]);
+
   printf("\n");
 }
 

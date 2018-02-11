@@ -35,7 +35,7 @@ uint8_t* buildMsg_getReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	asn_enc_rval_t ret_final =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, 1024);
 
-	xer_fprint(stdout, &asn_DEF_Message, message);
+	//xer_fprint(stdout, &asn_DEF_Message, message);
 	return buf_final;
 }
 
@@ -50,7 +50,7 @@ uint8_t* buildPDU_getReq(VarBindList_t* varlist, long reqID, char* cs, long v) {
 	PDUs_t *pdu;
 	pdu = calloc(1, sizeof(PDUs_t));
 	pdu->present = PDUs_PR_get_request;
-	pdu->choice.set_request = *getRequestPDU;
+	pdu->choice.get_request = *getRequestPDU;
 
 	size_t buf_size = 1024;
 	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
@@ -65,11 +65,11 @@ uint8_t* varBinding_getReq(long reqID, ObjectName_t* names[], char* cs, long v) 
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
 	int i = 0;
-	
+
 	do {
 		var_bind[i] = calloc(1, sizeof(VarBind_t));
 		var_bind[i]->name = *names[i];
-		var_bind[i]->choice.present = choice_PR_value;
+		var_bind[i]->choice.present = choice_PR_unSpecified;
 		var_bind[i]->choice.choice.unSpecified = -1;
 		ASN_SEQUENCE_ADD(&varlist->list, var_bind[i]);
 		i++;
@@ -81,11 +81,11 @@ uint8_t* varBinding_getReq(long reqID, ObjectName_t* names[], char* cs, long v) 
 uint8_t* getReqHandler(long reqID, char* args[]) {
 	char *token, *oid_str, *c_str = args[0];
 	long v = atol(args[1]);
-	ObjectName_t* oids[3];
+	ObjectName_t* oids[3] = {NULL, NULL, NULL};
 	size_t oid_size = 16;
 	uint8_t* oid;
 	int j, i = 0;
-	
+
 	do {
 		oid_str = args[i+2];
 		oids[i] = calloc(1, sizeof(ObjectName_t));

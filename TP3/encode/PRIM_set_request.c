@@ -18,7 +18,7 @@
 #include <ANY.h>
 #include <Message.h>
 
-uint8_t* buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
+uint8_t* buildMsg_setReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	ANY_t* data;
 	data = calloc(1, sizeof(ANY_t));
 	data->buf = buf;
@@ -40,7 +40,7 @@ uint8_t* buildMsg(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	return buf_final;
 }
 
-uint8_t* buildPDU(VarBindList_t* varlist, long reqID, char** tail) {
+uint8_t* buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
 	SetRequest_PDU_t* setRequestPDU;
 	setRequestPDU = calloc(1, sizeof(SetRequest_PDU_t));
 	setRequestPDU->request_id = reqID;
@@ -58,10 +58,10 @@ uint8_t* buildPDU(VarBindList_t* varlist, long reqID, char** tail) {
 	asn_enc_rval_t ret =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, buf_size);
 
-	return buildMsg(buf, ret, *tail, atol(*(tail+1)));
+	return buildMsg_setReq(buf, ret, *tail, atol(*(tail+1)));
 }
 
-uint8_t* varBinding(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char** tail) {
+uint8_t* varBinding_setReq(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char** tail) {
 	VarBind_t* var_bind;
 	var_bind = calloc(1, sizeof(VarBind_t));
 	var_bind->name = *name;
@@ -77,7 +77,7 @@ uint8_t* varBinding(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char
 	 */
 	int r = ASN_SEQUENCE_ADD(&varlist->list, var_bind);
 	if (!r)
-		return buildPDU(varlist, reqID, tail);
+		return buildPDU_setReq(varlist, reqID, tail);
 	else
 		return NULL;
 }
@@ -109,7 +109,7 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app
 	//=============================================
 	object_name->buf = oid;
 	object_name->size = i;
-	return varBinding(reqID, object_syntax, object_name, tail);
+	return varBinding_setReq(reqID, object_syntax, object_name, tail);
 }
 
 uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){

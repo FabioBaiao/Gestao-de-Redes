@@ -140,7 +140,13 @@ int decode_pdus(PDUs_t* pdu, char** result) {
       size = decode_var_bindings(pdu->choice.get_request.variable_bindings, result+2);
       return size+2;
       break;
-
+    case PDUs_PR_get_next_request:
+      result[0] = strdup("get-next-request");
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.get_next_request.request_id);
+      size = decode_var_bindings(pdu->choice.get_next_request.variable_bindings, result+2);
+      return size+2;
+      break;
     default:
       break;
   }

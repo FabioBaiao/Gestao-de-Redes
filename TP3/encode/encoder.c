@@ -2,6 +2,7 @@
 #include <arpa/inet.h>
 #include <PRIM_set_request.h>
 #include <PRIM_get_request.h>
+#include <PRIM_get_next.h>
 
 uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 	char* prim;
@@ -35,6 +36,12 @@ uint8_t* parsePrim(long reqID, char* line, char* argv[]) {
 			=> requestID  c_str  version  [oid.0]
 		*/
 		return getReqHandler(reqID, args);
+	}
+	if (!strcmp(prim, "get-next-request")){
+		/** ARGS
+			=> requestID  c_str  version  [oid]
+		*/
+		return getNextHandler(reqID, args);
 	}
 }
 

@@ -8,6 +8,22 @@
 #include <ApplicationSyntax.h>
 #include <ObjectName.h>
 #include <VarBindList.h>
+#include <asn_application.h>
+#include <asn_internal.h>
+#include <OCTET_STRING.h>
+#include <OBJECT_IDENTIFIER.h>
+#include <IpAddress.h>
+#include <Counter32.h>
+#include <Counter64.h>
+#include <Opaque.h>
+#include <Unsigned32.h>
+#include <TimeTicks.h>
+#include <asn_codecs_prim.h>
+#include <PDUs.h>
+#include <SetRequest-PDU.h>
+#include <VarBind.h>
+#include <ANY.h>
+#include <Message.h>
 
 uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail);
 uint8_t* app_setRequest(long reqID, char* type, char* val, char** tail);

@@ -1,22 +1,4 @@
 #include <PRIM_set_request.h>
-/* Including external dependencies */
-#include <asn_application.h>
-#include <asn_internal.h>
-#include <OCTET_STRING.h>
-#include <OBJECT_IDENTIFIER.h>
-#include <IpAddress.h>
-#include <Counter32.h>
-#include <Counter64.h>
-#include <Opaque.h>
-#include <Unsigned32.h>
-#include <TimeTicks.h>
-#include <asn_codecs_prim.h>
-#include <PDUs.h>
-#include <SetRequest-PDU.h>
-#include <GetRequest-PDU.h>
-#include <VarBind.h>
-#include <ANY.h>
-#include <Message.h>
 
 uint8_t* buildMsg_setReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	ANY_t* data;

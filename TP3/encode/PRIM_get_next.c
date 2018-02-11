@@ -1,6 +1,6 @@
-#include <PRIM_get_request.h>
+#include <PRIM_get_next.h>
 
-uint8_t* buildMsg_getReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
+uint8_t* buildMsg_getNext(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	ANY_t* data;
 	data = calloc(1, sizeof(ANY_t));
 	data->buf = buf;
@@ -22,28 +22,28 @@ uint8_t* buildMsg_getReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	return buf_final;
 }
 
-uint8_t* buildPDU_getReq(VarBindList_t* varlist, long reqID, char* cs, long v) {
-	GetRequest_PDU_t* getRequestPDU;
-	getRequestPDU = calloc(1, sizeof(GetRequest_PDU_t));
-	getRequestPDU->request_id = reqID;
-	getRequestPDU->error_index = 0;
-	getRequestPDU->error_status = 0;
-	getRequestPDU->variable_bindings = *varlist;
+uint8_t* buildPDU_getNext(VarBindList_t* varlist, long reqID, char* cs, long v) {
+	GetNextRequest_PDU_t* getNextRequestPDU;
+	getNextRequestPDU = calloc(1, sizeof(GetNextRequest_PDU_t));
+	getNextRequestPDU->request_id = reqID;
+	getNextRequestPDU->error_index = 0;
+	getNextRequestPDU->error_status = 0;
+	getNextRequestPDU->variable_bindings = *varlist;
 
 	PDUs_t *pdu;
 	pdu = calloc(1, sizeof(PDUs_t));
-	pdu->present = PDUs_PR_get_request;
-	pdu->choice.get_request = *getRequestPDU;
+	pdu->present = PDUs_PR_get_next_request;
+	pdu->choice.get_next_request = *getNextRequestPDU;
 
 	size_t buf_size = 1024;
 	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
 	asn_enc_rval_t ret =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, buf_size);
 
-	return buildMsg_getReq(buf, ret, cs, v);
+	return buildMsg_getNext(buf, ret, cs, v);
 }
 
-uint8_t* varBinding_getReq(long reqID, ObjectName_t* names[], char* cs, long v) {
+uint8_t* varBinding_getNext(long reqID, ObjectName_t* names[], char* cs, long v) {
 	VarBind_t* var_bind[3];
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
@@ -58,10 +58,10 @@ uint8_t* varBinding_getReq(long reqID, ObjectName_t* names[], char* cs, long v) 
 		i++;
 	} while (names[i] != NULL);
 
-	return buildPDU_getReq(varlist, reqID, cs, v);
+	return buildPDU_getNext(varlist, reqID, cs, v);
 }
 
-uint8_t* getReqHandler(long reqID, char* args[]) {
+uint8_t* getNextHandler(long reqID, char* args[]) {
 	char *token, *oid_str, *c_str = args[0];
 	long v = atol(args[1]);
 	ObjectName_t* oids[3] = {NULL, NULL, NULL};
@@ -87,5 +87,5 @@ uint8_t* getReqHandler(long reqID, char* args[]) {
 		i++;
 	} while(args[i+2] != NULL);
 
-	return varBinding_getReq(reqID, oids, c_str, v);
+	return varBinding_getNext(reqID, oids, c_str, v);
 }

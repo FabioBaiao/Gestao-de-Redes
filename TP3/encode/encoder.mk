@@ -8,7 +8,8 @@ ASN_PROGRAM_SRCS ?= \
 	encoder.c\
 	pdu_collection.c\
 	PRIM_set_request.c\
-	PRIM_get_request.c
+	PRIM_get_request.c\
+	PRIM_get_next.c
 
 all: $(ASN_PROGRAM)
 

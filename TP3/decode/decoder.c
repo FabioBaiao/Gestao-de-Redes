@@ -39,9 +39,35 @@ char** decode_application_syntax(ApplicationSyntax_t* app) {
   char** result = calloc(2, sizeof(char*));
   switch (app->present) {
       case ApplicationSyntax_PR_ipAddress_value:
-      result[0] = strdup("ipAddress");
-      result[1] = strdup((char *) app->choice.ipAddress_value.buf);
-      break;
+        result[0] = strdup("IpAddress");
+        result[1] = strdup((char *) app->choice.ipAddress_value.buf);
+        break;
+      case ApplicationSyntax_PR_counter_value:
+        result[0] = strdup("Counter32");
+        result[1] = calloc(8, sizeof(char));
+        sprintf(result[1], "%ld", app->choice.counter_value);
+        break;
+      case ApplicationSyntax_PR_timeticks_value:
+        result[0] = strdup("TimeTicks");
+        result[1] = calloc(16, sizeof(char));
+        sprintf(result[1], "%ld", app->choice.timeticks_value);
+        break;
+      case ApplicationSyntax_PR_arbitrary_value:
+        result[0] = strdup("Opaque");
+        result[1] = strdup((char *) app->choice.arbitrary_value.buf);
+        break;
+      case ApplicationSyntax_PR_big_counter_value:
+        result[0] = strdup("Counter64");
+        result[1] = calloc(16, sizeof(char));
+        unsigned long l;
+        asn_INTEGER2ulong(&app->choice.big_counter_value, &l);
+        sprintf(result[1], "%ld", l);
+        break;
+      case ApplicationSyntax_PR_unsigned_integer_value:
+        result[0] = strdup("Unsigned32");
+        result[1] = calloc(8, sizeof(char));
+        sprintf(result[1], "%ld", app->choice.unsigned_integer_value);
+        break;
   }
   return result;
 }

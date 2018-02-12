@@ -10,13 +10,18 @@ void printDecode(char** result, int size) {
   if (!strcmp(primitive, "set-request")) {
     printf("DATA TYPE: %s\n", result[i++]);
     printf("VALUE: %s\n", result[i++]);
+    printf("OID: %s\n", result[i++]);
   }
-  if (!strcmp(primitive, "get-bulk-request")) {
+  else if (!strcmp(primitive, "get-bulk-request")) {
     printf("NON REPEATERS: %s\n", result[i++]);
     printf("MAX REPETITIONS: %s\n", result[i++]);
+    while (i < size)
+      printf("OID: %s\n", result[i++]);
   }
-  while (i < size)
-    printf("OID: %s\n", result[i++]);
+  else {
+    while (i < size)
+      printf("OID: %s\n", result[i++]);
+  }
 
   printf("\n");
 }

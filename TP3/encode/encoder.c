@@ -13,7 +13,7 @@ typedef struct tuple {
 
 TUPLE lineHandler(char* line) {
 	TUPLE res = calloc(1, sizeof(struct tuple));
-	int size = 5, i = 0;
+	int size = 20, i = 0;
 	res->args = (char**) malloc(size * sizeof(char *));
 	res->prim = strtok(line, " ");
 	char* token = strtok(NULL, " ");
@@ -21,8 +21,8 @@ TUPLE lineHandler(char* line) {
 		res->args[i] = strdup(token);
 		token = strtok(NULL, " ");
 		i += 1;
-		if (i%5 == 0 && token != NULL) {
-			size += 5;
+		if (i%20 == 0 && token != NULL) {
+			size += 10;
 			res->args = realloc(res->args, size);
 		}
 	} while(token != NULL);
@@ -53,27 +53,27 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 
 	if (!strcmp(res->prim, "set-request")){
 		/**	ARGS
-			≃> requestID  data_type  value  oid  c_str  version
+			≃> requestID  c_str  version  [data_type  value  oid]
 		*/
-		return setReqHandler(reqID, res->args[0], res->args[1], res->args+2);
+		return setReqHandler(reqID, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
 	if (!strcmp(res->prim, "get-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid.0]
 		*/
-		return getReqHandler(reqID, res->args, res->argc);
+		//return getReqHandler(reqID, res->args, res->argc);
 	}
 	if (!strcmp(res->prim, "get-next-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid]
 		*/
-		return getNextHandler(reqID, res->args, res->argc);
+		//return getNextHandler(reqID, res->args, res->argc);
 	}
 	if (!strcmp(res->prim, "get-bulk-request")){
 		/** ARGS
 			=> requestID  c_str  version  non-repeaters  max-rep  [oid]
 		*/
-		return getBulkHandler(reqID, res->args, res->argc);
+		//return getBulkHandler(reqID, res->args, res->argc);
 	}
 /*	if (!strcmp(res->prim, "response")){
 		/** ARGS

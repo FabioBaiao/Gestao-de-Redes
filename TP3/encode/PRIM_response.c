@@ -1,28 +1,6 @@
 #include <PRIM_response.h>
 
-uint8_t* buildMsg_response(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
-	ANY_t* data;
-	data = calloc(1, sizeof(ANY_t));
-	data->buf = buf;
-	data->size = ret.encoded;
-
-	Message_t* message;
-	message = calloc(1, sizeof(Message_t));
-	OCTET_STRING_t* os = calloc(1, sizeof(OCTET_STRING_t));
-	OCTET_STRING_fromBuf(os, cs, -1);
-	message->version = v;
-	message->community = *os;
-	message->data = *data;
-
-	uint8_t* buf_final = calloc(1024, sizeof(uint8_t));
-	asn_enc_rval_t ret_final =
-		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, 1024);
-
-	//xer_fprint(stdout, &asn_DEF_Message, message);
-	return buf_final;
-}
-
-uint8_t* buildPDU_response(VarBindList_t* varlist, long reqID, char* cs, long v) {
+RES buildPDU_response(VarBindList_t* varlist, long reqID, char* cs, long v) {
 	GetNextRequest_PDU_t* getNextRequestPDU;
 	getNextRequestPDU = calloc(1, sizeof(GetNextRequest_PDU_t));
 	getNextRequestPDU->request_id = reqID;
@@ -40,10 +18,10 @@ uint8_t* buildPDU_response(VarBindList_t* varlist, long reqID, char* cs, long v)
 	asn_enc_rval_t ret =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_PDUs, pdu, buf, buf_size);
 
-	return buildMsg_getNext(buf, ret, cs, v);
+	return buildMsg(buf, ret, cs, v);
 }
 
-uint8_t* varBinding_response(long reqID, ObjectName_t* names[], char* cs, long v) {
+RES varBinding_response(long reqID, ObjectName_t* names[], char* cs, long v) {
 	VarBind_t* var_bind[3];
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
@@ -61,13 +39,13 @@ uint8_t* varBinding_response(long reqID, ObjectName_t* names[], char* cs, long v
 	return buildPDU_getNext(varlist, reqID, cs, v);
 }
 
-uint8_t* responseHandler(long reqID, char* args[], int n) {
+RES responseHandler(long reqID, char* args[], int n) {
 	char *token, *oid_str;
 	long errIndex = atol(args[0]), errStatus = atol(args[1]);
 	int j, i;
-	
-	ObjectName_t** oids = (ObjectName_t**) malloc(n * sizeof(ObjectName_t*));
-	for (i = 0; i < n; i++)
+	int triples = (n-2)%3;
+	ObjectName_t** oids = (ObjectName_t**) malloc(triples * sizeof(ObjectName_t*));
+	for (i = 0; i < triples; i++)
 		oids[i] = NULL;
 	size_t oid_size = 16;
 	uint8_t* oid;
@@ -88,8 +66,8 @@ uint8_t* responseHandler(long reqID, char* args[], int n) {
 
 		oids[i]->buf = oid;
 		oids[i]->size = j;
-		i++;
+		i+=3;
 	} while(i+2 < n);
 
-	return varBinding_response(reqID, oids, errIndex, errStatus);
+	return varBinding_response(reqID, oids, types, vals, errIndex, errStatus);
 }

@@ -1,6 +1,6 @@
 #include <PRIM_set_request.h>
 
-uint8_t* buildMsg_setReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
+RES buildMsg_setReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	ANY_t* data;
 	data = calloc(1, sizeof(ANY_t));
 	data->buf = buf;
@@ -18,11 +18,14 @@ uint8_t* buildMsg_setReq(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	asn_enc_rval_t ret_final =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, 1024);
 
-	xer_fprint(stdout, &asn_DEF_Message, message);
-	return buf_final;
+	RES res = calloc(1, sizeof(struct result));
+	res->buff = buf_final;
+	res->size = ret_final.encoded;
+
+	return res;
 }
 
-uint8_t* buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
+RES buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
 	SetRequest_PDU_t* setRequestPDU;
 	setRequestPDU = calloc(1, sizeof(SetRequest_PDU_t));
 	setRequestPDU->request_id = reqID;
@@ -43,7 +46,7 @@ uint8_t* buildPDU_setReq(VarBindList_t* varlist, long reqID, char** tail) {
 	return buildMsg_setReq(buf, ret, *tail, atol(*(tail+1)));
 }
 
-uint8_t* varBinding_setReq(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char** tail) {
+RES varBinding_setReq(long reqID, ObjectSyntax_t* syntax, ObjectName_t* name, char** tail) {
 	VarBind_t* var_bind;
 	var_bind = calloc(1, sizeof(VarBind_t));
 	var_bind->name = *name;
@@ -64,7 +67,7 @@ uint8_t* varBinding_setReq(long reqID, ObjectSyntax_t* syntax, ObjectName_t* nam
 		return NULL;
 }
 
-uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app, char* oid_str, char** tail) {
+RES varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app, char* oid_str, char** tail) {
 	ObjectSyntax_t* object_syntax;
 	object_syntax = calloc(1, sizeof(ObjectSyntax_t));
 	if (simple != NULL) {
@@ -94,7 +97,7 @@ uint8_t* varsObject(long reqID, SimpleSyntax_t* simple, ApplicationSyntax_t* app
 	return varBinding_setReq(reqID, object_syntax, object_name, tail);
 }
 
-uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
+RES setReqHandler(long reqID, char* type, char* val, char** tail){
 	SimpleSyntax_t* simple;
 	simple = calloc(1, sizeof(SimpleSyntax_t));
 
@@ -132,7 +135,7 @@ uint8_t* simple_setRequest(long reqID, char* type, char* val, char** tail){
 	else app_setRequest(reqID, type, val, tail);
 }
 
-uint8_t* app_setRequest(long reqID, char* type, char* val, char** tail){
+RES app_setRequest(long reqID, char* type, char* val, char** tail){
 	ApplicationSyntax_t* app;
 	app = calloc(1, sizeof(ApplicationSyntax_t));
 

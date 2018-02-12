@@ -18,7 +18,7 @@ TUPLE lineHandler(char* line) {
 	res->prim = strtok(line, " ");
 	char* token = strtok(NULL, " ");
 	do {
-		res->args[i] = token;
+		res->args[i] = strdup(token);
 		token = strtok(NULL, " ");
 		i += 1;
 		if (i%5 == 0 && token != NULL) {
@@ -43,7 +43,7 @@ TUPLE argvHandler(char* argv[], int n) {
 	return res;
 }
 
-uint8_t* parsePrim(long reqID, char* line, char* argv[], int n) {
+RES parsePrim(long reqID, char* line, char* argv[], int n) {
 	TUPLE res;
 
 	if (line != NULL)
@@ -51,30 +51,48 @@ uint8_t* parsePrim(long reqID, char* line, char* argv[], int n) {
 	else 
 		res = argvHandler(argv, n);
 
-	if (!strcmp(res->prim, "set-request")){
+	if (!strcmp(res->prim, "snmpset")){
 		/**	ARGS
-			≃> requestID  data_type  value  [oid,  c_str,  version]
+			≃> requestID  data_type  value  oid  c_str  version
 		*/
-		return simple_setRequest(reqID, res->args[0], res->args[1], res->args+2);
+		return setReqHandler(reqID, res->args[0], res->args[1], res->args+2);
 	}
-	if (!strcmp(res->prim, "get-request")){
+/*	if (!strcmp(res->prim, "snmpget")){
 		/** ARGS
 			=> requestID  c_str  version  [oid.0]
-		*/
+		//
 		return getReqHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "get-next-request")){
+	if (!strcmp(res->prim, "snmpgetnext")){
 		/** ARGS
 			=> requestID  c_str  version  [oid]
-		*/
+		//
 		return getNextHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "get-bulk-request")){
+	if (!strcmp(res->prim, "snmpbulkget")){
 		/** ARGS
 			=> requestID  c_str  version  non-repeaters  max-rep  [oid]
-		*/
+		//
 		return getBulkHandler(reqID, res->args, res->argc);
 	}
+	if (!strcmp(res->prim, "response")){
+		/** ARGS
+			=> requestID  errIndex  errStat  [(instance, type, value)]
+		//
+		return responseHandler(reqID, res->args, res->argc);
+	}
+	if (!strcmp(res->prim, "snmptrap")){
+		/** ARGS
+			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
+		//
+		return trapHandler(reqID, res->args, res->argc);
+	}
+	if (!strcmp(res->prim, "snmpinform")){
+		/** ARGS
+			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
+		//
+		return informHandler(reqID, res->args, res->argc);
+	}*/
 }
 
 int main(int argc, char** argv) {
@@ -94,9 +112,9 @@ int main(int argc, char** argv) {
 		int sock = socket(AF_INET, SOCK_DGRAM, 0);
 		socklen_t sock_size = sizeof(addr);
 
-		uint8_t* buff = parsePrim(requestID, NULL, argv+1, argc-1);
+		RES res = parsePrim(requestID, NULL, argv+1, argc-1);
 		int sent =
-			sendto(sock, buff, 1024, 0, (struct sockaddr *)&addr, sock_size);
+			sendto(sock, res->buff, res->size, 0, (struct sockaddr *)&addr, sock_size);
 	}
 	else
 		if (argc == 2) {
@@ -112,8 +130,10 @@ int main(int argc, char** argv) {
 				char* line = (char*) malloc(255);
 
 				while (!feof(fp)) {
-					if (fgets(line, 255, fp) != NULL)
-						fprintf(out, "%s\n", parsePrim(requestID, line, NULL, -1));
+					if (fgets(line, 255, fp) != NULL){
+						RES res = parsePrim(requestID, line, NULL, -1);
+						fwrite(res->buff, sizeof(uint8_t), res->size, out);
+					}
 				}
 
 				free(line);

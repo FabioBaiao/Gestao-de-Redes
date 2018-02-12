@@ -27,7 +27,7 @@ TUPLE lineHandler(char* line) {
 		}
 	} while(token != NULL);
 	res->argc = i;
-	
+
 	return res;
 }
 
@@ -48,7 +48,7 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 
 	if (line != NULL)
 		res = lineHandler(line);
-	else 
+	else
 		res = argvHandler(argv, n);
 
 	if (!strcmp(res->prim, "set-request")){
@@ -99,54 +99,33 @@ int main(int argc, char** argv) {
 
 	long requestID = 0;
 
-	if (argc > 2) {
-		/** INPUT FROM THE CMD LINE
-			=> ./encoder  PRIMITIVE  [DATA_TYPE]  [VALUE]  OID  C_STR  VERSION
-			EXAMPLE
-			=> ./encoder  set-request  integer  7  1.3.6.1.2.1.25.2.3.1.4  public  -v2c
-		*/
-		struct sockaddr_in addr;
+	struct sockaddr_in addr;
+	int sock = socket(AF_INET, SOCK_DGRAM, 0);
+	socklen_t sock_size;
+
+	if (argc > 1 && !strcmp(argv[1], "socket")) {
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(9999);
 		addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-		int sock = socket(AF_INET, SOCK_DGRAM, 0);
-		socklen_t sock_size = sizeof(addr);
 
-		RES res = parsePrim(requestID, NULL, argv+1, argc-1);
-		int sent =
-			sendto(sock, res->buff, res->size, 0, (struct sockaddr *)&addr, sock_size);
+		sock_size = sizeof(addr);
 	}
-	else
-		if (argc == 2) {
-			/** INPUT FROM FILE
-				=> ./encoder FILE_NAME
-			*/
-			printf("=> Looking for the file to read...\n");
-			FILE *fp = fopen(*(argv+1), "r");
 
-			if (fp != NULL) {
-				printf("=> File successfully opened!\n");
-				FILE *out = fopen("SNMP_output.txt", "w");
-				char* line = (char*) malloc(255);
+	char* line = calloc(255, sizeof(char));
 
-				while (!feof(fp)) {
-					if (fgets(line, 255, fp) != NULL){
-						RES res = parsePrim(requestID, line, NULL, -1);
-						fwrite(res->buff, sizeof(uint8_t), res->size, out);
-					}
-				}
+	while(fgets(line, 255, stdin) != NULL) {
+		RES res = parsePrim(requestID++, line, NULL, -1);
 
-				free(line);
-				fclose(fp);
-				fclose(out);
-				printf("Encoding finished! Output:\n");
-			    system("cat SNMP_output.txt");
-			}
-			else
-				printf("File couldn't be found or opened :(\n");
+		if (argc > 1 && !strcmp(argv[1], "socket")) {
+			int sent =
+				sendto(sock, res->buff, res->size, 0, (struct sockaddr *)&addr, sock_size);
 		}
-		else
-			printf("=> Not enough arguments were given.\n");
+		else {
+			printf("%ld\n", res->size);
+			fwrite(res->buff, sizeof(uint8_t), res->size, stdout);
+			printf("\n");
+		}
+	}
 
 	return 0;
 }

@@ -50,13 +50,16 @@ int main(int argc, char const *argv[]) {
   else {
     size_t buffer_size = 1024;
     uint8_t *buffer = calloc(buffer_size, sizeof(uint8_t));
-    //while (1) {
-      int recv = fread(buffer, sizeof(uint8_t), buffer_size, stdin);
+    int size;
+    while (scanf("%d\n", &size) > 0) {
+      int recv = fread(buffer, sizeof(uint8_t), size, stdin);
 
       char** result = calloc(8, sizeof(char*));
-      int size = decode_snmp(buffer, recv, result);
+      size = decode_snmp(buffer, recv, result);
       printDecode(result, size);
-    //}
+
+      getchar();
+    }
   }
   return 0;
 }

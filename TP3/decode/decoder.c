@@ -8,9 +8,11 @@ void printDecode(char** result, int size) {
   printf("PRIMITIVE: %s\n", result[i++]);
   printf("REQUEST ID: %s\n", result[i++]);
   if (!strcmp(primitive, "set-request")) {
-    printf("DATA TYPE: %s\n", result[i++]);
-    printf("VALUE: %s\n", result[i++]);
-    printf("OID: %s\n", result[i++]);
+    while (i < size) {
+      printf("DATA TYPE: %s\n", result[i++]);
+      printf("VALUE: %s\n", result[i++]);
+      printf("OID: %s\n", result[i++]);
+    }
   }
   else if (!strcmp(primitive, "get-bulk-request")) {
     printf("NON REPEATERS: %s\n", result[i++]);

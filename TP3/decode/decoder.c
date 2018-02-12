@@ -21,7 +21,7 @@ void printDecode(char** result, int size) {
   printf("\n");
 }
 
-int main(int argc, char const *argv[]) {
+void readFromSocket() {
   struct sockaddr_in addr;
   addr.sin_family = AF_INET;
   addr.sin_port = htons(9999);
@@ -39,6 +39,24 @@ int main(int argc, char const *argv[]) {
     char** result = calloc(8, sizeof(char*));
     int size = decode_snmp(buffer, recv, result);
     printDecode(result, size);
+  }
+}
+
+int main(int argc, char const *argv[]) {
+
+  if (argc > 1 && !strcmp(argv[1], "socket")) {
+    readFromSocket();
+  }
+  else {
+    size_t buffer_size = 1024;
+    uint8_t *buffer = calloc(buffer_size, sizeof(uint8_t));
+    //while (1) {
+      int recv = fread(buffer, sizeof(uint8_t), buffer_size, stdin);
+
+      char** result = calloc(8, sizeof(char*));
+      int size = decode_snmp(buffer, recv, result);
+      printDecode(result, size);
+    //}
   }
   return 0;
 }

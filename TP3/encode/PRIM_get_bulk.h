@@ -1,6 +1,8 @@
 #ifndef PRIM_get_bulk
 #define PRIM_get_bulk
 
+#include <PRIM_set_request.h>
+
 #include <stdio.h>
 #include <asn_codecs.h>
 #include <ObjectName.h>
@@ -15,9 +17,10 @@
 #include <ANY.h>
 #include <Message.h>
 
-uint8_t* buildMsg_getBulk(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v);
-uint8_t* buildPDU_getBulk(VarBindList_t* varlist, long reqID, char* cs, long v);
-uint8_t* varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v);
-uint8_t* getBulkHandler(long reqID, char* args[], int n);
+
+RES buildMsg_getBulk(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v);
+RES buildPDU_getBulk(VarBindList_t* varlist, long reqID, char* cs, long v);
+RES varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v);
+RES getBulkHandler(long reqID, char* args[], int n);
 
 #endif

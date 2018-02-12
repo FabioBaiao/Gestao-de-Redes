@@ -1,6 +1,6 @@
 #include <PRIM_get_next.h>
 
-uint8_t* buildMsg_getBulk(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
+RES buildMsg_getBulk(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	ANY_t* data;
 	data = calloc(1, sizeof(ANY_t));
 	data->buf = buf;
@@ -18,11 +18,14 @@ uint8_t* buildMsg_getBulk(uint8_t* buf, asn_enc_rval_t ret, char* cs, long v) {
 	asn_enc_rval_t ret_final =
 		asn_encode_to_buffer(0, ATS_BER, &asn_DEF_Message, message, buf_final, 1024);
 
-	//xer_fprint(stdout, &asn_DEF_Message, message);
-	return buf_final;
+	RES res = calloc(1, sizeof(struct result));
+	res->buff = buf_final;
+	res->size = ret_final.encoded;
+
+	return res;
 }
 
-uint8_t* buildPDU_getBulk(VarBindList_t* varlist, long reqID, char* cs, long v, long nr, long maxr) {
+RES buildPDU_getBulk(VarBindList_t* varlist, long reqID, char* cs, long v, long nr, long maxr) {
 	GetBulkRequest_PDU_t* getBulkRequestPDU;
 	getBulkRequestPDU = calloc(1, sizeof(GetBulkRequest_PDU_t));
 	getBulkRequestPDU->request_id = reqID;
@@ -43,7 +46,7 @@ uint8_t* buildPDU_getBulk(VarBindList_t* varlist, long reqID, char* cs, long v, 
 	return buildMsg_getBulk(buf, ret, cs, v);
 }
 
-uint8_t* varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v, long nr, long maxr) {
+RES varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v, long nr, long maxr) {
 	VarBind_t* var_bind[3];
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
@@ -61,7 +64,7 @@ uint8_t* varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v,
 	return buildPDU_getBulk(varlist, reqID, cs, v, nr, maxr);
 }
 
-uint8_t* getBulkHandler(long reqID, char* args[], int n) {
+RES getBulkHandler(long reqID, char* args[], int n) {
 	char *token, *oid_str, *c_str = args[0];
 	long v = atol(args[1]);
 	int noRep = atol(args[2]);

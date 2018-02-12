@@ -51,43 +51,43 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 	else 
 		res = argvHandler(argv, n);
 
-	if (!strcmp(res->prim, "snmpset")){
+	if (!strcmp(res->prim, "set-request")){
 		/**	ARGS
 			≃> requestID  data_type  value  oid  c_str  version
 		*/
 		return setReqHandler(reqID, res->args[0], res->args[1], res->args+2);
 	}
-/*	if (!strcmp(res->prim, "snmpget")){
+	if (!strcmp(res->prim, "get-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid.0]
-		//
+		*/
 		return getReqHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "snmpgetnext")){
+	if (!strcmp(res->prim, "get-next-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid]
-		//
+		*/
 		return getNextHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "snmpbulkget")){
+	if (!strcmp(res->prim, "get-bulk-request")){
 		/** ARGS
 			=> requestID  c_str  version  non-repeaters  max-rep  [oid]
-		//
+		*/
 		return getBulkHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "response")){
+/*	if (!strcmp(res->prim, "response")){
 		/** ARGS
 			=> requestID  errIndex  errStat  [(instance, type, value)]
 		//
 		return responseHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "snmptrap")){
+	if (!strcmp(res->prim, "trap-notification")){
 		/** ARGS
 			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
 		//
 		return trapHandler(reqID, res->args, res->argc);
 	}
-	if (!strcmp(res->prim, "snmpinform")){
+	if (!strcmp(res->prim, "inform")){
 		/** ARGS
 			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
 		//

@@ -1,1 +1,4 @@
 asn1c/
+encode/*.o
+decode/*.o
+encode/SNMP_output.txt

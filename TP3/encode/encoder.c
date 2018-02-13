@@ -4,12 +4,7 @@
 #include <PRIM_get_request.h>
 #include <PRIM_get_next.h>
 #include <PRIM_get_bulk.h>
-
-typedef struct tuple {
-	char* prim;
-	char** args;
-	int argc;
-} *TUPLE;
+#include <encodeAPI.h>
 
 TUPLE lineHandler(char* line) {
 	TUPLE res = calloc(1, sizeof(struct tuple));
@@ -61,19 +56,19 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 		/** ARGS
 			=> requestID  c_str  version  [oid.0]
 		*/
-		//return getReqHandler(reqID, res->args, res->argc);
+		return getReqHandler(reqID, res->args, res->argc);
 	}
 	if (!strcmp(res->prim, "get-next-request")){
 		/** ARGS
 			=> requestID  c_str  version  [oid]
 		*/
-		//return getNextHandler(reqID, res->args, res->argc);
+		return getNextHandler(reqID, res->args, res->argc);
 	}
 	if (!strcmp(res->prim, "get-bulk-request")){
 		/** ARGS
 			=> requestID  c_str  version  non-repeaters  max-rep  [oid]
 		*/
-		//return getBulkHandler(reqID, res->args, res->argc);
+		return getBulkHandler(reqID, res->args, res->argc);
 	}
 /*	if (!strcmp(res->prim, "response")){
 		/** ARGS

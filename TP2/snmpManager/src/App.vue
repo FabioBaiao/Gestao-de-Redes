@@ -29,9 +29,9 @@
                   <td class="text-center">{{ partition.desc }}</td>
                   <td class="text-center">{{ partition.size }}</td>
                   <td :id="'used'+partition.desc" class="text-center">{{ partition.used }}</td>
-                  <td v-if="parseInt(partition.free) > 60" :id="'free'+partition.desc" class="text-center" style="color: green">{{ partition.free }}</td>
-                  <td v-if="parseInt(partition.free) <= 60 && parseInt(partition.free) >= 30" :id="'free'+partition.desc" class="text-center" style="color: yellow">{{ partition.free }}</td>
-                  <td v-if="parseInt(partition.free) < 30" :id="'free'+partition.desc" class="text-center" style="color: red">{{ partition.free }}</td>                                
+                  <td v-if="parseInt(partition.free) >= 50" :id="'free'+partition.desc" class="text-center" style="color: green">{{ partition.free }}</td>
+                  <td v-if="parseInt(partition.free) < 50 && parseInt(partition.free) >= 10" :id="'free'+partition.desc" class="text-center" style="color: yellow">{{ partition.free }}</td>
+                  <td v-if="parseInt(partition.free) < 10" :id="'free'+partition.desc" class="text-center" style="color: red">{{ partition.free }}</td>                                
                 </tr>
               </tbody>
             </table>

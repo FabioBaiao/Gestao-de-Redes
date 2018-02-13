@@ -70,13 +70,13 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 		*/
 		return getBulkHandler(reqID, res->args, res->argc);
 	}
-/*	if (!strcmp(res->prim, "response")){
+	if (!strcmp(res->prim, "response")){
 		/** ARGS
 			=> requestID  errIndex  errStat  [(instance, type, value)]
-		//
-		return responseHandler(reqID, res->args, res->argc);
+		*/	
+		return responseHandler(reqID, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
-	if (!strcmp(res->prim, "trap-notification")){
+/*	if (!strcmp(res->prim, "trap-notification")){
 		/** ARGS
 			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
 		//

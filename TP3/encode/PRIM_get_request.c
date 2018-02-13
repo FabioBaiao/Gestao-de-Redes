@@ -1,5 +1,4 @@
 #include <PRIM_get_request.h>
-#include <encodeAPI.h>
 
 RES buildPDU_getReq(VarBindList_t* varlist, long reqID, char* cs, long v) {
 	GetRequest_PDU_t* getRequestPDU;
@@ -23,7 +22,7 @@ RES buildPDU_getReq(VarBindList_t* varlist, long reqID, char* cs, long v) {
 }
 
 RES varBinding_getReq(long reqID, ObjectName_t* names[], char* cs, long v) {
-	VarBind_t* var_bind[3];
+	VarBind_t* var_bind[5];
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
 	int i = 0;

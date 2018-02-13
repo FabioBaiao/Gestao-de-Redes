@@ -4,6 +4,8 @@
 #include <PRIM_get_request.h>
 #include <PRIM_get_next.h>
 #include <PRIM_get_bulk.h>
+#include <PRIM_response.h>
+#include <PRIM_trap_inform.h>
 #include <encodeAPI.h>
 
 TUPLE lineHandler(char* line) {
@@ -73,7 +75,7 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 	if (!strcmp(res->prim, "response")){
 		/** ARGS
 			=> requestID  errIndex  errStat  [(instance, type, value)]
-		*/	
+		*/
 		return responseHandler(reqID, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
 	if (!strcmp(res->prim, "trap-notification")){
@@ -82,7 +84,7 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 		*/
 		return trapHandler(reqID, 1, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
-	if (!strcmp(res->prim, "inform")){
+	if (!strcmp(res->prim, "inform-request")){
 		/** ARGS
 			=> requestID  !trap  c_str  version  [(instance, type, value)]
 		*/

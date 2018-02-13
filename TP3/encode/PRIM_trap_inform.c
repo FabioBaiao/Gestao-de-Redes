@@ -3,24 +3,28 @@
 RES buildPDU_trap(VarBindList_t* varlist, int trap, long reqID, char* cs, long v) {
 	PDUs_t *pdu;
 	pdu = calloc(1, sizeof(PDUs_t));
-	SNMPv2_Trap_PDU_t* primPDU;
+	PDU_t* primPDU;
 
 	if (!trap) {
-		primPDU = (InformRequest_PDU_t*) primPDU;
 		primPDU = calloc(1, sizeof(InformRequest_PDU_t));
-		pdu->present = PDUs_PR_inform_request;
-		pdu->choice.inform_request = *primPDU;
 	}
 	else {
 		primPDU = calloc(1, sizeof(SNMPv2_Trap_PDU_t));
-		pdu->present = PDUs_PR_snmpV2_trap;
-		pdu->choice.snmpV2_trap = *primPDU;
 	}
 
 	primPDU->request_id = reqID;
 	primPDU->error_index = 0;
 	primPDU->error_status = 0;
 	primPDU->variable_bindings = *varlist;
+
+	if (!trap) {
+		pdu->present = PDUs_PR_inform_request;
+		pdu->choice.inform_request = (InformRequest_PDU_t) *primPDU;
+	}
+	else {
+		pdu->present = PDUs_PR_snmpV2_trap;
+		pdu->choice.snmpV2_trap = (SNMPv2_Trap_PDU_t) *primPDU;
+	}
 
 	size_t buf_size = 1024;
 	uint8_t* buf = calloc(buf_size, sizeof(uint8_t));
@@ -134,7 +138,7 @@ VarBind_t* app_trap(char* oid, char* type, char* val){
 		OCTET_STRING_t* s = calloc(1, sizeof(OCTET_STRING_t));
 		if (!OCTET_STRING_fromString(s, val))
 			app->choice.arbitrary_value = *s;
-		return varsObject_trap(NULL, app, oid);	
+		return varsObject_trap(NULL, app, oid);
 	}
 	if (!strcmp(type, "Counter64")) {
 		app->present = ApplicationSyntax_PR_big_counter_value;

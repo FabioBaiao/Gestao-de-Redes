@@ -7,18 +7,19 @@ void printDecode(char** result, int size) {
   char* primitive = result[i];
   printf("PRIMITIVE: %s\n", result[i++]);
   printf("REQUEST ID: %s\n", result[i++]);
-  if (!strcmp(primitive, "set-request")) {
+
+  if(!strcmp(primitive, "get-bulk-request")) {
+    printf("NON REPEATERS: %s\n", result[i++]);
+    printf("MAX REPETITIONS: %s\n", result[i++]);
+  }
+
+  if (!strcmp(primitive, "set-request") || !strcmp(primitive, "inform-request") ||
+      !strcmp(primitive, "trap-notification") || !strcmp(primitive, "response")) {
     while (i < size) {
       printf("DATA TYPE: %s\n", result[i++]);
       printf("VALUE: %s\n", result[i++]);
       printf("OID: %s\n", result[i++]);
     }
-  }
-  else if (!strcmp(primitive, "get-bulk-request")) {
-    printf("NON REPEATERS: %s\n", result[i++]);
-    printf("MAX REPETITIONS: %s\n", result[i++]);
-    while (i < size)
-      printf("OID: %s\n", result[i++]);
   }
   else {
     while (i < size)

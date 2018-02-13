@@ -156,6 +156,28 @@ int decode_pdus(PDUs_t* pdu, char** result) {
       sprintf(result[3], "%ld", pdu->choice.get_bulk_request.max_repetitions);
       size = decode_var_bindings(pdu->choice.get_next_request.variable_bindings, result+4);
       return size+4;
+      break;
+    case PDUs_PR_inform_request:
+      result[0] = strdup("inform-request");
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.inform_request.request_id);
+      size = decode_var_bindings(pdu->choice.inform_request.variable_bindings, result+2);
+      return size+2;
+      break;
+    case PDUs_PR_snmpV2_trap:
+      result[0] = strdup("trap-notification");
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.snmpV2_trap.request_id);
+      size = decode_var_bindings(pdu->choice.snmpV2_trap.variable_bindings, result+2);
+      return size+2;
+      break;
+    case PDUs_PR_response:
+      result[0] = strdup("response");
+      result[1] = calloc(16, sizeof(char));
+      sprintf(result[1], "%ld", pdu->choice.response.request_id);
+      size = decode_var_bindings(pdu->choice.response.variable_bindings, result+2);
+      return size+2;
+      break;
     default:
       break;
   }

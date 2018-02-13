@@ -12,7 +12,8 @@ ASN_PROGRAM_SRCS ?= \
 	PRIM_get_request.c\
 	PRIM_get_next.c\
 	PRIM_get_bulk.c\
-	PRIM_response.c
+	PRIM_response.c\
+	PRIM_trap_inform.c
 
 all: $(ASN_PROGRAM)
 

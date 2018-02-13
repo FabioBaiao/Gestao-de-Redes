@@ -76,18 +76,18 @@ RES parsePrim(long reqID, char* line, char* argv[], int n) {
 		*/	
 		return responseHandler(reqID, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
-/*	if (!strcmp(res->prim, "trap-notification")){
+	if (!strcmp(res->prim, "trap-notification")){
 		/** ARGS
-			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
-		//
-		return trapHandler(reqID, res->args, res->argc);
+			=> requestID  trap  c_str  version  [(instance, type, value)]
+		*/
+		return trapHandler(reqID, 1, res->args[0], res->args[1], res->args+2, res->argc-2);
 	}
 	if (!strcmp(res->prim, "inform")){
 		/** ARGS
-			=> requestID  c_str  version  uptime  trap-oid  [(instance, type, value)]
-		//
-		return informHandler(reqID, res->args, res->argc);
-	}*/
+			=> requestID  !trap  c_str  version  [(instance, type, value)]
+		*/
+		return trapHandler(reqID, 0, res->args[0], res->args[1], res->args+2, res->argc-2);
+	}
 }
 
 int main(int argc, char** argv) {

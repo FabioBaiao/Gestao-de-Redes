@@ -154,7 +154,15 @@ VarBind_t* app_trap(char* oid, char* type, char* val){
 	}
 }
 
-
+/**
+* reqID: indice do request, definido pela aplicacao
+* trap: 0 -> inform; 1 -> trap;
+* cs: community string
+* v: versao
+* tail: array de strings com o seguinte formato: [oid, type, value, oid, type, value, ...]
+* size: tamanho do array tail
+* RETORNA um RES que contem a codificacao e o numero de bytes respetivo
+*/
 RES trapHandler(long reqID, int trap, char* cs, char* v, char* tail[], int size) {
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));

@@ -9,4 +9,11 @@ int decode_var_bind(VarBind_t*, char**);
 int decode_var_bindings(VarBindList_t, char**);
 int decode_pdus(PDUs_t*, char**);
 int decode_message(Message_t*, char**);
+
+/**
+* buffer_final: pdu codificado
+* buffer_final_size: tamanho do pdu codificado
+* result: array de strings que conterá o resultado
+* RETORNA um int que representa o numero de elementos do array result que foram preenchidos
+*/
 int decode_snmp(uint8_t*, size_t, char**);

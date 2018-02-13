@@ -39,6 +39,12 @@ RES varBinding_getBulk(long reqID, ObjectName_t* names[], char* cs, long v, long
 	return buildPDU_getBulk(varlist, reqID, cs, v, nr, maxr);
 }
 
+/**
+* reqID: indice do request, definido pela aplicacao
+* args: array de strings com o seguinte formato: [community string, version, non_repeaters, max_repetitions, oid, oid, ...]
+* n: tamanho do array tail
+* RETORNA um RES que contem a codificacao e o numero de bytes respetivo
+*/
 RES getBulkHandler(long reqID, char* args[], int n) {
 	char *token, *oid_str, *c_str = args[0];
 	long v = atol(args[1]);

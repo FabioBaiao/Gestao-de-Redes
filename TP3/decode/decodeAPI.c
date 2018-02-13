@@ -198,6 +198,12 @@ int decode_message(Message_t* message, char** result) {
   return size+2;
 }
 
+/**
+* buffer_final: pdu codificado
+* buffer_final_size: tamanho do pdu codificado
+* result: array de strings que conterá o resultado
+* RETORNA um int que representa o numero de elementos do array result que foram preenchidos
+*/
 int decode_snmp(uint8_t buffer_final[], size_t buffer_final_size, char** result) {
   Message_t* message = 0;
   asn_dec_rval_t rval = asn_decode(0, ATS_BER, &asn_DEF_Message, (void **)&message, buffer_final, buffer_final_size);

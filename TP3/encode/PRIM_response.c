@@ -125,7 +125,7 @@ VarBind_t* app_response(char* oid, char* type, char* val){
 		OCTET_STRING_t* s = calloc(1, sizeof(OCTET_STRING_t));
 		if (!OCTET_STRING_fromString(s, val))
 			app->choice.arbitrary_value = *s;
-		return varsObject_response(NULL, app, oid);	
+		return varsObject_response(NULL, app, oid);
 	}
 	else if (!strcmp(type, "Counter64")) {
 		app->present = ApplicationSyntax_PR_big_counter_value;
@@ -184,6 +184,14 @@ VarBind_t* other_response(char* oid, char* type, char* val) {
 }
 
 
+/**
+* reqID: indice do request, definido pela aplicacao
+* ei: indice do erro
+* es: estado do erro
+* tail: array de strings com o seguinte formato: [oid, type, value, oid, type, value, ...]
+* size: tamanho do array tail
+* RETORNA um RES que contem a codificacao e o numero de bytes respetivo
+*/
 RES responseHandler(long reqID, char* ei, char* es, char* tail[], int size) {
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));

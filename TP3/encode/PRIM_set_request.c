@@ -125,7 +125,7 @@ VarBind_t* app_setRequest(char* oid, char* type, char* val){
 		OCTET_STRING_t* s = calloc(1, sizeof(OCTET_STRING_t));
 		if (!OCTET_STRING_fromString(s, val))
 			app->choice.arbitrary_value = *s;
-		return varsObject(NULL, app, oid);	
+		return varsObject(NULL, app, oid);
 	}
 	if (!strcmp(type, "Counter64")) {
 		app->present = ApplicationSyntax_PR_big_counter_value;
@@ -141,6 +141,14 @@ VarBind_t* app_setRequest(char* oid, char* type, char* val){
 	}
 }
 
+/**
+* reqID: indice do request, definido pela aplicacao
+* cs: community string
+* v: versao
+* tail: array de strings com o seguinte formato: [oid, type, value, oid, type, value, ...]
+* size: tamanho do array tail
+* RETORNA um RES que contem a codificacao e o numero de bytes respetivo
+*/
 RES setReqHandler(long reqID, char* cs, char* v, char** tail, int size) {
 	VarBindList_t* varlist;
 	varlist = calloc(1, sizeof(VarBindList_t));
